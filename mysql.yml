@@ -1,0 +1,55 @@
+  == File: mysql.yml
+#
+# Install & Configure MySQL
+#
+#  == Copyright
+#     All Rights Reserved
+#
+# --------------------------------------------------------------------------
+# WARNING: This file belongs to the Core framework. Avoid any local changes
+# --------------------------------------------------------------------------
+#
+# This file is Managed by ANSIBLE
+# --------------------------------------------------------------------------
+
+
+- name: Install python
+  yum: name=python2-PyMySQL state=installed
+
+- name: Install python
+  yum: name=python3-mysqlclient state=installed
+
+
+- name: Install mySQL
+  yum: name=mysql-server state=installed
+
+- name: Copy my.cnf File
+  template:
+     src: "{{ansible_roles_path}}/files/mysql/my.cnf.j2"
+     dest: "/etc/my.cnf"
+
+
+- name: Start mySQL Service
+  service: name=mysqld state=restarted
+
+- name: Create master user %
+  mysql_user: name=master password={{ master_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Create master user localhost
+  mysql_user: name=master password={{ master_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Create backup user %
+  mysql_user: name=backup password={{ backup_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Create mysql_read user %
+  mysql_user: name=mysql_read password={{ mysql_read_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Create mysql_write user %
+  mysql_user: name=mysql_write password={{ mysql_write_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Start and Enable Mysqld Service
+  systemd:
+    name: mysqld
+    state: restarted
+    enabled: yes
+
